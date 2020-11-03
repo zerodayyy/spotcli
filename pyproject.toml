@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "spotcli"
+version = "1.0.0"
+description = "Spot CLI"
+authors = ["Dmitry Kovalenko <dmytro.kovalenko@ironsrc.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+rich = "^9.0.1"
+click = "^7.1.2"
+consulate = "^0.6.0"
+durations = "^0.3.3"
+spotinst-sdk = "^1.0.51"
+stringcase = "^1.2.0"
+attrs = "^20.2.0"
+python-configuration = {extras = ["yaml"], version = "^0.8.1"}
+parallel-execute = "^0.1.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.1.1"
+black = { version = "^20.8b1", allow-prereleases = true }
+flake8 = "^3.8.4"
+isort = "^5.6.4"
+
+[tool.poetry.scripts]
+spotcli = "spotcli.cli:main"
+
+[tool.pytest.ini_options]
+python_files = "test_*"
+python_classes = "*Tests"
+python_functions = "test_*"
+testpaths = ["test"]
+markers = ["elastigroup: Tests for Elastigroup module", "unit: Unit tests"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
