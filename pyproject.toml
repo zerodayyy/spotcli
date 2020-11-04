@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "spotcli"
-version = "1.0.1"
+version = "1.0.2"
 description = "Spot CLI"
 authors = ["Dmitry Kovalenko <dmytro.kovalenko@ironsrc.com>"]
 license = "MIT"
