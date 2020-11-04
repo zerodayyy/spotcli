@@ -21,7 +21,7 @@ jobs:
       - name: Setup Poetry
         uses: abatilo/actions-poetry@v2.0.0
       - name: Build wheel
-        run: poetry build
+        run: poetry build -f wheel
       - name: Get tag name
         id: tag_name
         run: echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
