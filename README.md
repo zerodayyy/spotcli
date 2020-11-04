@@ -4,16 +4,19 @@ SpotCLI is a command-line interface for managing Spot Elastigroups.
 
 ## Installation
 
-Download the .whl file from [latest release](https://github.com/SupersonicAds/spotcli/releases/latest) page and install it using pip:
+Install latest SpotCLI:
 
 ```bash
-pip install spotcli-1.0.2-py3-none-any.whl
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/SupersonicAds/spotcli/master/install.sh)"
 ```
 
-Verify that spotcli is installed by running:
+You can also install SpotCLI manually:
+
+- Download wheel from [releases](https://github.com/SupersonicAds/spotcli/releases) page
+- Install SpotCLI using pip:
 
 ```bash
-spotcli version
+pip install spotcli-1.0.0-py3-none-any.whl
 ```
 
 ## Configuration
@@ -89,6 +92,7 @@ To automatically accept all prompts, add `-y`.
 You can run multiple standalone actions with this tool as well.
 
 Supported actions:
+
 - status (*prints group name, ID, instance count and process suspension status when `--show-processes` is used*)
 - roll
 - suspend/unsuspend process or scaling policy (*you can do multiple at once*)
