@@ -1,10 +1,10 @@
+name: Release
 on:
   push:
     tags:
       - "v*"
-name: Release
 jobs:
-  ci:
+  Release:
     strategy:
       fail-fast: false
       matrix:
