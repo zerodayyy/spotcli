@@ -22,11 +22,14 @@ jobs:
         uses: abatilo/actions-poetry@v2.0.0
       - name: Build wheel
         run: poetry build
+      - name: Get tag name
+        id: tag_name
+        run: echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
       - name: Get entry from changelog
         id: changelog
         uses: mindsers/changelog-reader-action@v2
         with:
-          version: ${{ github.ref }}
+          version: ${{ steps.tag_name.outputs.current_version }}
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
