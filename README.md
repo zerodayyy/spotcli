@@ -1,7 +1,6 @@
+# SpotCLI
 
-# Spot CLI
-
-Spot CLI is a command-line interface for managing Spot Elastigroups.
+SpotCLI is a command-line interface for managing Spot Elastigroups.
 
 ## Installation
 
@@ -19,7 +18,7 @@ spotcli version
 
 ## Configuration
 
-Spot CLI looks in `~/.spot/config.yaml` by default, extending the config if extra sources are specified. Basic config may look like this:
+SpotCLI looks in `~/.spot/config.yaml` by default, extending the config if extra sources are specified. Basic config may look like this:
 
 ```yaml
 version: 1
