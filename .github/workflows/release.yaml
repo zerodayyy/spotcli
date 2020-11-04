@@ -22,8 +22,14 @@ jobs:
         uses: abatilo/actions-poetry@v2.0.0
       - name: Build wheel
         run: poetry build
+      - name: Get entry from changelog
+        id: changelog
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          version: ${{ github.ref }}
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.changelog.outputs.changes }}
           artifacts: dist/spotcli-*.whl
