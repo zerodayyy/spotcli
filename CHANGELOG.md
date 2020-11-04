@@ -18,5 +18,5 @@ All notable changes to this project will be documented in this file.
 - Initial version
 
 [unreleased]: https://github.com/SupersonicAds/spotcli/compare/v1.0.1...HEAD
-[1.0.1]: https://github.com/SupersonicAds/spotcli/compare/v1.0.1...v1.0.0
+[1.0.1]: https://github.com/SupersonicAds/spotcli/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/SupersonicAds/spotcli/releases/tag/v1.0.0
