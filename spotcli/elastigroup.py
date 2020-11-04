@@ -243,7 +243,8 @@ class Elastigroup:
                 for policy in self._group["scaling"].get(scaling_policy_kind, [])
             ]
             try:
-                self.spot.suspend_scaling_policies(self.id, scaling_policies)
+                for policy in scaling_policies:
+                    self.spot.suspend_scaling_policies(self.id, policy)
             except spotinst_sdk.SpotinstClientException as e:
                 if "is already suspended" not in str(e):
                     raise e
@@ -268,7 +269,8 @@ class Elastigroup:
                 policy["policy_name"]
                 for policy in self._group["scaling"].get(scaling_policy_kind, [])
             ]
-            self.spot.resume_suspended_scaling_policies(self.id, scaling_policies)
+            for policy in scaling_policies:
+                self.spot.resume_suspended_scaling_policies(self.id, policy)
             return
         self.spot.remove_suspended_process(self.id, [process.name])
 
