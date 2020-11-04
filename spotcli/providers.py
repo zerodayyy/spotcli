@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 import attr
-import consulate
+import consul
 import rich.console
 import spotinst_sdk
 
@@ -40,10 +40,8 @@ class Provider(ABC):
             provider = providers_mapping[kind]
             return super(Provider, cls).__new__(provider)
         except KeyError:
-            console.print(f"Invalid provider kind: {kind}")
-            sys.exit(os.EX_CONFIG)
-        except Exception:
-            console.print_exception()
+            console.print(f"[bold red]ERROR:[/] Invalid provider kind: {kind}")
+            sys.exit(1)
 
 
 @attr.s(auto_attribs=True)
@@ -62,13 +60,11 @@ class FileProvider(Provider):
                 content = file.read()
             return content
         except FileNotFoundError:
-            console.print(f"File not found: {file_path}")
+            console.print(f"[bold red]ERROR:[/] File not found: {file_path}")
             sys.exit(1)
         except (PermissionError, OSError, IOError):
-            console.print(f"Unable to read file: {file_path}")
+            console.print(f"[bold red]ERROR:[/] Unable to read file: {file_path}")
             sys.exit(1)
-        except Exception:
-            console.print_exception()
 
     def put(self, path, content):
         file_path = os.path.join(self.path, path)
@@ -76,10 +72,8 @@ class FileProvider(Provider):
             with open(file_path, "w") as file:
                 file.write(content)
         except (PermissionError, OSError, IOError):
-            console.print(f"Unable to write to file: {file_path}")
-            sys.exit(os.EX_IOERR)
-        except Exception:
-            console.print_exception()
+            console.print(f"[bold red]ERROR:[/] Unable to write to file: {file_path}")
+            sys.exit(1)
 
 
 @attr.s(auto_attribs=True)
@@ -88,6 +82,7 @@ class ConsulProvider(Provider):
     kind: str
     server: str
     path: str
+    scheme: Optional[str] = ""
     datacenter: Optional[str] = ""
     token: Optional[str] = ""
 
@@ -98,23 +93,24 @@ class ConsulProvider(Provider):
             # Initialize Consul client
             host, *port = self.server.split(":")
             port = int(port[0]) if port else 8500
+            scheme = self.scheme or "http"
             datacenter = self.datacenter or None
             token = self.token or None
-            consul = consulate.Consul(host, port, datacenter, token)
-            self._consul = consul
-            return consul
+            consul_client = consul.Consul(host=host, port=port, scheme=scheme, dc=datacenter, token=token)
+            self._consul = consul_client
+            return consul_client
 
     def get(self, path):
         kv_path = os.path.join(self.path, path)
         consul = self.client()
         try:
-            content = consul.kv.get(kv_path)
+            kv_path = kv_path.lstrip("/")
+            _, document = consul.kv.get(kv_path)
+            content = document["Value"].decode("utf-8")
             return content
-        except KeyError:
-            console.print(f"Consul key not found: {kv_path}")
-            sys.exit(os.EX_NOTFOUND)
-        except Exception:
-            console.print_exception()
+        except (KeyError, TypeError):
+            console.print(f"[bold red]ERROR:[/] Consul key not found: {kv_path}")
+            sys.exit(1)
 
     def put(self, path, content):
         kv_path = os.path.join(self.path, path)
