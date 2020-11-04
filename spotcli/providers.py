@@ -93,7 +93,7 @@ class ConsulProvider(Provider):
             # Initialize Consul client
             host, *port = self.server.split(":")
             port = int(port[0]) if port else 8500
-            scheme = self.scheme or None
+            scheme = self.scheme or "http"
             datacenter = self.datacenter or None
             token = self.token or None
             consul_client = consul.Consul(host=host, port=port, scheme=scheme, dc=datacenter, token=token)
@@ -104,6 +104,7 @@ class ConsulProvider(Provider):
         kv_path = os.path.join(self.path, path)
         consul = self.client()
         try:
+            kv_path = kv_path.lstrip("/")
             _, document = consul.kv.get(kv_path)
             content = document["Value"].decode("utf-8")
             return content
