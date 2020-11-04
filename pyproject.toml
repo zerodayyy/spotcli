@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "spotcli"
-version = "1.0.0"
+version = "1.0.1"
 description = "Spot CLI"
 authors = ["Dmitry Kovalenko <dmytro.kovalenko@ironsrc.com>"]
 license = "MIT"
@@ -8,6 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
+importlib-metadata = {version = "^1.0", python = "<3.8"}
 rich = "^9.0.1"
 click = "^7.1.2"
 consulate = "^0.6.0"
