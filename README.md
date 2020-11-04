@@ -7,7 +7,7 @@ SpotCLI is a command-line interface for managing Spot Elastigroups.
 Install latest SpotCLI:
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/SupersonicAds/spotcli/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/SupersonicAds/spotcli/master/install.sh)"
 ```
 
 You can also install SpotCLI manually:
