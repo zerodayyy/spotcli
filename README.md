@@ -5,10 +5,10 @@ Spot CLI is a command-line interface for managing Spot Elastigroups.
 
 ## Installation
 
-Go to Releases page, download the latest .whl and install it using pip:
+Download the .whl file from [latest release](https://github.com/SupersonicAds/spotcli/releases/latest) page and install it using pip:
 
 ```bash
-pip install spotcli-1.0.0-py3-none-any.whl
+pip install spotcli-1.0.2-py3-none-any.whl
 ```
 
 Verify that spotcli is installed by running:
