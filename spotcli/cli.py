@@ -23,8 +23,8 @@ def main():
 
 @click.command()
 def version():
-    """Get Spot CLI version."""
-    console.print(f"Spot CLI version {spotcli.__version__}")
+    """Get SpotCLI version."""
+    console.print(f"SpotCLI version {spotcli.__version__}")
 
 
 @click.command()
@@ -35,7 +35,7 @@ def run(scenario, auto_approve):
 
     SCENARIO is the name of the scenario to run.
     """
-    console.print(f"[bold]Spot CLI version {spotcli.__version__}")
+    console.print(f"[bold]SpotCLI version {spotcli.__version__}")
     config = spotcli.configuration.load()
     try:
         s = config.scenarios[scenario]
@@ -78,7 +78,7 @@ def status(group, show_processes):
 
     GROUP is elastigroup name, alias or regex.
     """
-    console.print(f"[bold]Spot CLI version {spotcli.__version__}")
+    console.print(f"[bold]SpotCLI version {spotcli.__version__}")
     config = spotcli.configuration.load()
     targets = spotcli.tasks.TargetList(config.providers["spot"], config.aliases, [group])
     console.print("\n")
@@ -167,7 +167,7 @@ main.add_command(scale)
 
 
 def action(action, target, auto_approve, **kwargs):
-    console.print(f"[bold]Spot CLI version {spotcli.__version__}")
+    console.print(f"[bold]SpotCLI version {spotcli.__version__}")
     config = spotcli.configuration.load()
     targets = spotcli.tasks.TargetList(config.providers["spot"], config.aliases, [target])
     task = spotcli.tasks.Task(kind=action, targets=targets, **kwargs)

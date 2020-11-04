@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "spotcli"
 version = "1.0.3"
-description = "Spot CLI"
+description = "CLI for Spot Elastigroups management"
 authors = ["Dmitry Kovalenko <dmytro.kovalenko@ironsrc.com>"]
 license = "MIT"
 readme = "README.md"
