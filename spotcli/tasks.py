@@ -89,27 +89,23 @@ class RollTask(Task):
     grace: Optional[Union[str, int]] = ""
 
     def run(self):
+        def work(target, batch, grace, console):
+            try:
+                target.roll(batch, grace)
+                console.print(
+                    f"Started roll on [bold blue]{target.name}[/] with [bold cyan]"
+                    f"{self.batch if '%' in str(self.batch) else self.batch + ' instances'}[/] batch size"
+                )
+                return True
+            except Exception:
+                console.print(
+                    f"[bold red]ERROR:[/] Failed to roll [bold]{target.name}[/]"
+                )
+                console.print_exception()
+                return False
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
-        batch = self.batch or None
-        grace = self.grace or None
         for target in self.targets:
-
-            def work(batch, grace, console):
-                try:
-                    target.roll(batch, grace)
-                    console.print(
-                        f"Started roll on [bold blue]{target.name}[/] with [bold cyan]"
-                        f"{self.batch if '%' in str(self.batch) else self.batch + ' instances'}[/] batch size"
-                    )
-                    return True
-                except Exception:
-                    console.print(
-                        f"[bold red]ERROR:[/] Failed to roll [bold]{target.name}[/]"
-                    )
-                    console.print_exception()
-                    return False
-
-            loom.add_function(work, [], dict(batch=batch, grace=grace, console=console))
+            loom.add_function(work, [], dict(target=target, batch=self.batch, grace=self.grace, console=console))
         return loom.execute()
 
 
@@ -119,24 +115,22 @@ class UpscaleTask(Task):
     amount: Union[int, str]
 
     def run(self):
+        def work(target, amount, console):
+            try:
+                target.scale_up(amount)
+                console.print(
+                    f"Scaled up [bold blue]{target.name}[/] by [bold cyan]{amount if '%' in str(amount) else amount + ' instances'}[/]"
+                )
+                return True
+            except Exception:
+                console.print(
+                    f"[bold red]ERROR:[/] Failed to scale up [bold]{target.name}[/]"
+                )
+                console.print_exception()
+                return False
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
         for target in self.targets:
-
-            def work(amount, console):
-                try:
-                    target.scale_up(amount)
-                    console.print(
-                        f"Scaled up [bold blue]{target.name}[/] by [bold cyan]{amount if '%' in str(amount) else amount + ' instances'}[/]"
-                    )
-                    return True
-                except Exception:
-                    console.print(
-                        f"[bold red]ERROR:[/] Failed to scale up [bold]{target.name}[/]"
-                    )
-                    console.print_exception()
-                    return False
-
-            loom.add_function(work, [], dict(amount=self.amount, console=console))
+            loom.add_function(work, [], dict(target=target, amount=self.amount, console=console))
         return loom.execute()
 
 
@@ -146,24 +140,22 @@ class DownscaleTask(Task):
     amount: Union[int, str]
 
     def run(self):
+        def work(target, amount, console):
+            try:
+                target.scale_down(amount)
+                console.print(
+                    f"Scaled down [bold blue]{target.name}[/] by [bold cyan]{amount if '%' in str(amount) else amount + ' instances'}[/]"
+                )
+                return True
+            except Exception:
+                console.print(
+                    f"[bold red]ERROR:[/] Failed to scale down [bold blue]{target.name}[/]"
+                )
+                console.print_exception()
+                return False
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
         for target in self.targets:
-
-            def work(amount, console):
-                try:
-                    target.scale_down(amount)
-                    console.print(
-                        f"Scaled down [bold blue]{target.name}[/] by [bold cyan]{amount if '%' in str(amount) else amount + ' instances'}[/]"
-                    )
-                    return True
-                except Exception:
-                    console.print(
-                        f"[bold red]ERROR:[/] Failed to scale down [bold blue]{target.name}[/]"
-                    )
-                    console.print_exception()
-                    return False
-
-            loom.add_function(work, [], dict(amount=self.amount, console=console))
+            loom.add_function(work, [], dict(target=target, amount=self.amount, console=console))
         return loom.execute()
 
 
@@ -173,26 +165,24 @@ class SuspendTask(Task):
     processes: List[str]
 
     def run(self):
+        def work(target, process, console):
+            process = ElastigroupProcess(process)
+            try:
+                target.suspend(process)
+                console.print(
+                    f"Suspended [bold cyan]{process.name}[/] on [bold blue]{target.name}[/]"
+                )
+                return True
+            except Exception:
+                console.print(
+                    f"[bold red]ERROR:[/] Failed to suspend [bold cyan]{process.name}[/] on [bold blue]{target.name}[/]"
+                )
+                console.print_exception()
+                return False
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
         for target in self.targets:
             for process in self.processes:
-
-                def work(process, console):
-                    process = ElastigroupProcess(process)
-                    try:
-                        target.suspend(process)
-                        console.print(
-                            f"Suspended [bold cyan]{process.name}[/] on [bold blue]{target.name}[/]"
-                        )
-                        return True
-                    except Exception:
-                        console.print(
-                            f"[bold red]ERROR:[/] Failed to suspend [bold cyan]{process.name}[/] on [bold blue]{target.name}[/]"
-                        )
-                        console.print_exception()
-                        return False
-
-                loom.add_function(work, [], dict(process=process, console=console))
+                loom.add_function(work, [], dict(target=target, process=process, console=console))
         return loom.execute()
 
 
@@ -202,26 +192,24 @@ class UnsuspendTask(Task):
     processes: List[str]
 
     def run(self):
+        def work(target, process, console):
+            process = ElastigroupProcess(process)
+            try:
+                target.unsuspend(process)
+                console.print(
+                    f"Unsuspended [bold cyan]{process.name}[/] on [bold blue]{target.name}[/]"
+                )
+                return True
+            except Exception:
+                console.print(
+                    f"[bold red]ERROR:[/] Failed to unsuspend [bold cyan]{process.name}[/] on [bold blue]{target.name}[/]"
+                )
+                console.print_exception()
+                return False
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
         for target in self.targets:
             for process in self.processes:
-
-                def work(process, console):
-                    process = ElastigroupProcess(process)
-                    try:
-                        target.unsuspend(process)
-                        console.print(
-                            f"Unsuspended [bold cyan]{process.name}[/] on [bold blue]{target.name}[/]"
-                        )
-                        return True
-                    except Exception:
-                        console.print(
-                            f"[bold red]ERROR:[/] Failed to unsuspend [bold cyan]{process.name}[/] on [bold blue]{target.name}[/]"
-                        )
-                        console.print_exception()
-                        return False
-
-                loom.add_function(work, [], dict(process=process, console=console))
+                loom.add_function(work, [], dict(target=target, process=process, console=console))
         return loom.execute()
 
 
