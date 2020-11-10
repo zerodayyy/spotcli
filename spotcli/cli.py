@@ -15,7 +15,7 @@ import spotcli.configuration
 import spotcli.tasks
 
 UPDATE_URL = "https://api.github.com/repos/SupersonicAds/spotcli/releases/latest"
-UPDATE_COMMAND = 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/SupersonicAds/spotcli/master/install.sh)"'
+UPDATE_COMMAND = 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/SupersonicAds/spotcli/main/install.sh)"'
 
 
 console = rich.console.Console(highlight=False)
