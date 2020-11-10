@@ -1,5 +1,14 @@
 # SpotCLI
 
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/SupersonicAds/spotcli/Release)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/SupersonicAds/spotcli)
+![GitHub Release Date](https://img.shields.io/github/release-date/SupersonicAds/spotcli)
+![GitHub All Releases](https://img.shields.io/github/downloads/SupersonicAds/spotcli/total)
+![GitHub issues](https://img.shields.io/github/issues/SupersonicAds/spotcli)
+![GitHub top language](https://img.shields.io/github/languages/top/SupersonicAds/spotcli)
+![Lines of code](https://img.shields.io/tokei/lines/github/SupersonicAds/spotcli)
+![GitHub](https://img.shields.io/github/license/SupersonicAds/spotcli)
+
 SpotCLI is a command-line interface for managing Spot Elastigroups.
 
 ## Installation
