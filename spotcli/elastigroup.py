@@ -48,9 +48,7 @@ class Elastigroup:
         try:
             groups = cls._elastigroups
         except AttributeError:
-            groups = {
-                group["name"]: group["id"] for group in spot.get_elastigroups()
-            }
+            groups = {group["name"]: group["id"] for group in spot.get_elastigroups()}
             cls._elastigroups = groups
 
         # Full match
@@ -59,21 +57,17 @@ class Elastigroup:
 
         # Substring match
         if (
-            matches := [
-                cls(spot, groups[group]) for group in groups if query in group
-            ]
-        ):
+            matches := [cls(spot, groups[group]) for group in groups if query in group]
+        ) :
             return matches
 
         # Regular expression match
         regex = re.compile(query, re.IGNORECASE | re.ASCII)
         if (
             matches := [
-                cls(spot, groups[group])
-                for group in groups
-                if regex.search(group)
+                cls(spot, groups[group]) for group in groups if regex.search(group)
             ]
-        ):
+        ) :
             return matches
 
         return []
@@ -102,8 +96,10 @@ class Elastigroup:
         process_suspensions = self.spot.list_suspended_process(self.id)
         policy_suspensions = self.spot.list_suspended_scaling_policies(self.id)
         policies = dict()
-        policies_raw = {"down": self._group["scaling"].get("down") or [],
-                        "up": self._group["scaling"].get("up") or []}
+        policies_raw = {
+            "down": self._group["scaling"].get("down") or [],
+            "up": self._group["scaling"].get("up") or [],
+        }
         policies[ElastigroupProcess.AUTO_SCALE_DOWN] = [
             policy["policy_name"] for policy in policies_raw["down"]
         ]
@@ -165,7 +161,7 @@ class Elastigroup:
 
         """
         self.spot.update_elastigroup({"capacity": capacity}, self.id)
-    
+
     @property
     def name(self):
         """Get Elastigroup name.
@@ -237,7 +233,9 @@ class Elastigroup:
             ElastigroupProcess.AUTO_SCALE_DOWN,
             ElastigroupProcess.AUTO_SCALE_UP,
         ]:
-            scaling_policy_kind = ElastigroupProcess(process).value.rsplit("_", 1)[-1].lower()
+            scaling_policy_kind = (
+                ElastigroupProcess(process).value.rsplit("_", 1)[-1].lower()
+            )
             scaling_policies = [
                 policy["policy_name"]
                 for policy in self._group["scaling"].get(scaling_policy_kind, [])
@@ -264,7 +262,9 @@ class Elastigroup:
             ElastigroupProcess.AUTO_SCALE_DOWN,
             ElastigroupProcess.AUTO_SCALE_UP,
         ]:
-            scaling_policy_kind = ElastigroupProcess(process).value.rsplit("_", 1)[-1].lower()
+            scaling_policy_kind = (
+                ElastigroupProcess(process).value.rsplit("_", 1)[-1].lower()
+            )
             scaling_policies = [
                 policy["policy_name"]
                 for policy in self._group["scaling"].get(scaling_policy_kind, [])

@@ -16,6 +16,26 @@ class Provider(ABC):
     name: str
     kind: str = ""
 
+    providers = {}
+
+    @classmethod
+    def register(cls, kind):
+        def decorator(subcls):
+            cls.providers[kind] = subcls
+            return subcls
+
+        return decorator
+
+    def __new__(cls, name, kind, *args, **kwargs):
+        if cls is not Provider:
+            return super(Provider, cls).__new__(cls, name, kind, *args, **kwargs)
+        try:
+            provider = cls.providers[kind]
+            return super(Provider, cls).__new__(provider)
+        except KeyError:
+            console.print(f"[bold red]ERROR:[/] Invalid provider kind: {kind}")
+            sys.exit(1)
+
     @abstractmethod
     def client(self):
         pass
@@ -28,22 +48,8 @@ class Provider(ABC):
     def put(self):
         pass
 
-    def __new__(cls, name, kind, *args, **kwargs):
-        providers_mapping = {
-            "file": FileProvider,
-            "consul": ConsulProvider,
-            "spot": SpotProvider
-        }
-        if cls is not Provider:
-            return super(Provider, cls).__new__(cls, name, kind, *args, **kwargs)
-        try:
-            provider = providers_mapping[kind]
-            return super(Provider, cls).__new__(provider)
-        except KeyError:
-            console.print(f"[bold red]ERROR:[/] Invalid provider kind: {kind}")
-            sys.exit(1)
 
-
+@Provider.register("file")
 @attr.s(auto_attribs=True)
 class FileProvider(Provider):
     name: str
@@ -76,6 +82,7 @@ class FileProvider(Provider):
             sys.exit(1)
 
 
+@Provider.register("consul")
 @attr.s(auto_attribs=True)
 class ConsulProvider(Provider):
     name: str
@@ -96,7 +103,9 @@ class ConsulProvider(Provider):
             scheme = self.scheme or "http"
             datacenter = self.datacenter or None
             token = self.token or None
-            consul_client = consul.Consul(host=host, port=port, scheme=scheme, dc=datacenter, token=token)
+            consul_client = consul.Consul(
+                host=host, port=port, scheme=scheme, dc=datacenter, token=token
+            )
             self._consul = consul_client
             return consul_client
 
@@ -118,6 +127,7 @@ class ConsulProvider(Provider):
         consul.kv.set(kv_path, content)
 
 
+@Provider.register("spot")
 @attr.s(auto_attribs=True)
 class SpotProvider(Provider):
     name: str
@@ -129,7 +139,9 @@ class SpotProvider(Provider):
         try:
             return self._spot
         except AttributeError:
-            spot = spotinst_sdk.SpotinstClient(account_id=self.account, auth_token=self.token)
+            spot = spotinst_sdk.SpotinstClient(
+                account_id=self.account, auth_token=self.token
+            )
             self._spot = spot
             return spot
 

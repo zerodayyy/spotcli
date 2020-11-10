@@ -31,7 +31,9 @@ class Config:
         try:
             return self.config.version
         except KeyError:
-            console.print("[bold red]ERROR:[/] Missing [italic]version[/] in the config")
+            console.print(
+                "[bold red]ERROR:[/] Missing [italic]version[/] in the config"
+            )
             sys.exit(1)
 
     @property
@@ -42,11 +44,18 @@ class Config:
             sources = []
             try:
                 for source in self.config.sources:
-                    sources.append(Source(provider=self.providers[source["provider"]], path=source["path"]))
+                    sources.append(
+                        Source(
+                            provider=self.providers[source["provider"]],
+                            path=source["path"],
+                        )
+                    )
                 self._sources = sources
                 return sources
             except KeyError:
-                console.print("[bold red]ERROR:[/] Missing [italic]sources[/] in the config")
+                console.print(
+                    "[bold red]ERROR:[/] Missing [italic]sources[/] in the config"
+                )
                 sys.exit(1)
 
     @property
@@ -56,9 +65,18 @@ class Config:
         except AttributeError:
             providers = {}
             try:
-                providers_raw = {p: self.config.providers[p].as_dict() for p in list(self.config.providers)} if "providers" in self.config else {}
+                providers_raw = (
+                    {
+                        p: self.config.providers[p].as_dict()
+                        for p in list(self.config.providers)
+                    }
+                    if "providers" in self.config
+                    else {}
+                )
             except KeyError:
-                console.print("[bold red]ERROR:[/] Missing [italic]providers[/] in the config")
+                console.print(
+                    "[bold red]ERROR:[/] Missing [italic]providers[/] in the config"
+                )
                 sys.exit(1)
             for name, provider in providers_raw.items():
                 providers[name] = Provider(name=name, **provider)
@@ -73,9 +91,18 @@ class Config:
             s = {}
             if "scenarios" in self.config:
                 try:
-                    scenarios_raw = {s: self.config.scenarios[s].as_dict() for s in list(self.config.scenarios)} if "scenarios" in self.config else {}
+                    scenarios_raw = (
+                        {
+                            s: self.config.scenarios[s].as_dict()
+                            for s in list(self.config.scenarios)
+                        }
+                        if "scenarios" in self.config
+                        else {}
+                    )
                 except KeyError:
-                    console.print("[bold red]ERROR:[/] Missing [italic]scenarios[/] in the config")
+                    console.print(
+                        "[bold red]ERROR:[/] Missing [italic]scenarios[/] in the config"
+                    )
                     sys.exit(1)
                 for name, scenario in scenarios_raw.items():
                     tasks = []
@@ -84,9 +111,15 @@ class Config:
                             self.providers["spot"], self.aliases, task["targets"]
                         )
                         tasks.append(Task(**task))
-                    s.update({name: Scenario(
-                        name=name, tasks=tasks, description=scenario["description"]
-                    )})
+                    s.update(
+                        {
+                            name: Scenario(
+                                name=name,
+                                tasks=tasks,
+                                description=scenario["description"],
+                            )
+                        }
+                    )
             scenarios = s
             self._scenarios = scenarios
             return scenarios
@@ -97,11 +130,18 @@ class Config:
             return self._aliases
         except AttributeError:
             try:
-                aliases = {
-                    k: Alias(name=k, targets=v) for k, v in self.config.aliases.as_dict().items()
-                } if "aliases" in self.config else {}
+                aliases = (
+                    {
+                        k: Alias(name=k, targets=v)
+                        for k, v in self.config.aliases.as_dict().items()
+                    }
+                    if "aliases" in self.config
+                    else {}
+                )
             except KeyError:
-                console.print("[bold red]ERROR:[/] Missing [italic]aliases[/] in the config")
+                console.print(
+                    "[bold red]ERROR:[/] Missing [italic]aliases[/] in the config"
+                )
                 sys.exit(1)
             self._aliases = aliases
             return aliases
@@ -126,7 +166,8 @@ def load():
     # Load actual configuration
     try:
         config_data = ConfigurationSet(
-            bootstrap_config_data, *[source.read() for source in bootstrap_config.sources]
+            bootstrap_config_data,
+            *[source.read() for source in bootstrap_config.sources]
         )
         config = Config(config_data)
         return config

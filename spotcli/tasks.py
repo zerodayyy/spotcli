@@ -57,16 +57,12 @@ class Task(ABC):
     kind: str
     targets: TargetList
 
-    task_kinds = dict()
-
-    @abstractmethod
-    def run(self):
-        pass
+    kinds = {}
 
     @classmethod
     def register(cls, kind):
         def decorator(subcls):
-            cls.task_kinds[kind] = subcls
+            cls.kinds[kind] = subcls
             return subcls
 
         return decorator
@@ -75,11 +71,15 @@ class Task(ABC):
         if cls is not Task:
             return super(Task, cls).__new__(cls, kind, *args, **kwargs)
         try:
-            task = cls.task_kinds[kind]
+            task = cls.kinds[kind]
             return super(Task, cls).__new__(task)
         except KeyError:
             console.print(f"[bold red]ERROR:[/] Invalid action: {kind}")
             sys.exit(1)
+
+    @abstractmethod
+    def run(self):
+        pass
 
 
 @Task.register("roll")
@@ -103,9 +103,13 @@ class RollTask(Task):
                 )
                 console.print_exception()
                 return False
+
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
         for target in self.targets:
-            loom.add_function(work, [], dict(target=target, batch=self.batch, grace=self.grace, console=console))
+            kwargs = dict(
+                target=target, batch=self.batch, grace=self.grace, console=console
+            )
+            loom.add_function(work, [], kwargs)
         return loom.execute()
 
 
@@ -128,9 +132,12 @@ class UpscaleTask(Task):
                 )
                 console.print_exception()
                 return False
+
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
         for target in self.targets:
-            loom.add_function(work, [], dict(target=target, amount=self.amount, console=console))
+            loom.add_function(
+                work, [], dict(target=target, amount=self.amount, console=console)
+            )
         return loom.execute()
 
 
@@ -153,9 +160,12 @@ class DownscaleTask(Task):
                 )
                 console.print_exception()
                 return False
+
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
         for target in self.targets:
-            loom.add_function(work, [], dict(target=target, amount=self.amount, console=console))
+            loom.add_function(
+                work, [], dict(target=target, amount=self.amount, console=console)
+            )
         return loom.execute()
 
 
@@ -179,10 +189,13 @@ class SuspendTask(Task):
                 )
                 console.print_exception()
                 return False
+
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
         for target in self.targets:
             for process in self.processes:
-                loom.add_function(work, [], dict(target=target, process=process, console=console))
+                loom.add_function(
+                    work, [], dict(target=target, process=process, console=console)
+                )
         return loom.execute()
 
 
@@ -206,10 +219,13 @@ class UnsuspendTask(Task):
                 )
                 console.print_exception()
                 return False
+
         loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
         for target in self.targets:
             for process in self.processes:
-                loom.add_function(work, [], dict(target=target, process=process, console=console))
+                loom.add_function(
+                    work, [], dict(target=target, process=process, console=console)
+                )
         return loom.execute()
 
 
