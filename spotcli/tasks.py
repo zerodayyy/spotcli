@@ -1,18 +1,16 @@
 import sys
+import threading
 from abc import ABC, abstractmethod
 from collections import UserList
 from collections.abc import Iterable
 from typing import List, Optional, Union
 
 import attr
-import pexecute.thread
 import rich.console
 
 from spotcli.elastigroup import Elastigroup, ElastigroupProcess
 
 console = rich.console.Console(highlight=False)
-
-PARALLEL_THREADS = 32
 
 
 class Alias(UserList):
@@ -104,13 +102,20 @@ class RollTask(Task):
                 console.print_exception()
                 return False
 
-        loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
+        threads = []
         for target in self.targets:
-            kwargs = dict(
-                target=target, batch=self.batch, grace=self.grace, console=console
+            thread = threading.Thread(
+                None,
+                work,
+                kwargs=dict(
+                    target=target, batch=self.batch, grace=self.grace, console=console
+                ),
             )
-            loom.add_function(work, [], kwargs)
-        return loom.execute()
+            thread.start()
+            threads.append(thread)
+
+        for thread in threads:
+            thread.join()
 
 
 @Task.register("upscale")
@@ -133,12 +138,18 @@ class UpscaleTask(Task):
                 console.print_exception()
                 return False
 
-        loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
+        threads = []
         for target in self.targets:
-            loom.add_function(
-                work, [], dict(target=target, amount=self.amount, console=console)
+            thread = threading.Thread(
+                None,
+                work,
+                kwargs=dict(target=target, amount=self.amount, console=console),
             )
-        return loom.execute()
+            thread.start()
+            threads.append(thread)
+
+        for thread in threads:
+            thread.join()
 
 
 @Task.register("downscale")
@@ -161,12 +172,18 @@ class DownscaleTask(Task):
                 console.print_exception()
                 return False
 
-        loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
+        threads = []
         for target in self.targets:
-            loom.add_function(
-                work, [], dict(target=target, amount=self.amount, console=console)
+            thread = threading.Thread(
+                None,
+                work,
+                kwargs=dict(target=target, amount=self.amount, console=console),
             )
-        return loom.execute()
+            thread.start()
+            threads.append(thread)
+
+        for thread in threads:
+            thread.join()
 
 
 @Task.register("suspend")
@@ -190,13 +207,19 @@ class SuspendTask(Task):
                 console.print_exception()
                 return False
 
-        loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
+        threads = []
         for target in self.targets:
             for process in self.processes:
-                loom.add_function(
-                    work, [], dict(target=target, process=process, console=console)
+                thread = threading.Thread(
+                    None,
+                    work,
+                    kwargs=dict(target=target, process=process, console=console),
                 )
-        return loom.execute()
+                thread.start()
+                threads.append(thread)
+
+        for thread in threads:
+            thread.join()
 
 
 @Task.register("unsuspend")
@@ -220,13 +243,19 @@ class UnsuspendTask(Task):
                 console.print_exception()
                 return False
 
-        loom = pexecute.thread.ThreadLoom(max_runner_cap=PARALLEL_THREADS)
+        threads = []
         for target in self.targets:
             for process in self.processes:
-                loom.add_function(
-                    work, [], dict(target=target, process=process, console=console)
+                thread = threading.Thread(
+                    None,
+                    work,
+                    kwargs=dict(target=target, process=process, console=console),
                 )
-        return loom.execute()
+                thread.start()
+                threads.append(thread)
+
+        for thread in threads:
+            thread.join()
 
 
 @attr.s(auto_attribs=True)

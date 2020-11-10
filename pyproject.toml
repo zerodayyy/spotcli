@@ -17,7 +17,6 @@ python-consul2 = "^0.1.5"
 stringcase = "^1.2.0"
 attrs = "^20.2.0"
 python-configuration = {extras = ["yaml"], version = "^0.8.1"}
-parallel-execute = "^0.1.0"
 semver = "^2.13.0"
 requests = "^2.24.0"
 
