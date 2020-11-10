@@ -43,7 +43,7 @@ def list(kind):
     kind = kind.lower().strip()
     if kind not in ["aliases", "scenarios"]:
         console.print(
-            f"[bold red]ERROR:[/b] Invalid argument {kind}, should be `aliases` or `scenarios`"
+            f"[bold red]ERROR:[/] Invalid argument [b]{kind}[/], should be [b]aliases[/] or [b]scenarios[/]"
         )
         return
     console.print(f"[bold]SpotCLI version {spotcli.__version__}")
@@ -160,15 +160,13 @@ def status(group, show_processes):
     for target in targets:
         if show_processes:
             processes_raw = target.processes
-            processes = (
-                "\n".join(
-                    [
-                        f"[bold]{proc}[/]: "
-                        f"{'[green]' if 'active' in processes_raw[proc] else '[red]'}"
-                        f"{processes_raw[proc]}[/]"
-                        for proc in processes_raw
-                    ]
-                )
+            processes = "\n".join(
+                [
+                    f"[bold]{proc}[/]: "
+                    f"{'[green]' if 'active' in processes_raw[proc] else '[red]'}"
+                    f"{processes_raw[proc]}[/]"
+                    for proc in processes_raw
+                ]
             )
             table.add_row(
                 target.id, target.name, str(target.capacity["target"]), processes
@@ -297,7 +295,9 @@ def action(action: str, target: str, auto_approve: bool, **kwargs) -> None:
     )
     task = spotcli.tasks.Task(kind=action, targets=targets, **kwargs)
     console.print("\n")
-    table = rich.table.Table(title=f"Going to [bold]{task.kind}[/] these elastigroups:", show_lines=True)
+    table = rich.table.Table(
+        title=f"Going to [bold]{task.kind}[/] these elastigroups:", show_lines=True
+    )
     table.add_column("ID", justify="center", style="cyan")
     table.add_column("Name", style="magenta")
     table.add_column("Instances", style="green")
