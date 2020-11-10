@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.0] - 2020-11-10
+
+### Added
+
+- Check for updates on startup
+- Added `list` command to list aliases or scenarios
+
+### Changed
+
+- Providers now register at the factory identical to Tasks
+- Improved table printing
+
 ## [1.0.4] - 2020-11-04
 
 ### Added
@@ -40,7 +52,8 @@ All notable changes to this project will be documented in this file.
 
 - Initial version
 
-[unreleased]: https://github.com/SupersonicAds/spotcli/compare/v1.0.4...HEAD
+[unreleased]: https://github.com/SupersonicAds/spotcli/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/SupersonicAds/spotcli/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/SupersonicAds/spotcli/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/SupersonicAds/spotcli/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/SupersonicAds/spotcli/compare/v1.0.1...v1.0.2
