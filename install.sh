@@ -2,6 +2,9 @@
 set -eu
 trap "" SIGINT
 
+[ -z "$LC_ALL" ] && export LC_ALL=C.UTF-8
+[ -z "$LANG" ] && export LANG=C.UTF-8
+
 DOWNLOAD_URL=$(curl -fsSL https://api.github.com/repos/SupersonicAds/spotcli/releases/latest \
         | grep browser_download_url \
         | cut -d '"' -f 4)
