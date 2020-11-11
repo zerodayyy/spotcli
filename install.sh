@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -e
 trap "" SIGINT
 
 [ -z "$LC_ALL" ] && export LC_ALL=C.UTF-8
