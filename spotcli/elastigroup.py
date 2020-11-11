@@ -56,18 +56,14 @@ class Elastigroup:
             return [cls(spot, groups[query])]
 
         # Substring match
-        if (
-            matches := [cls(spot, groups[group]) for group in groups if query in group]
-        ) :
+        matches = [cls(spot, groups[group]) for group in groups if query in group]
+        if matches:
             return matches
 
         # Regular expression match
         regex = re.compile(query, re.IGNORECASE | re.ASCII)
-        if (
-            matches := [
-                cls(spot, groups[group]) for group in groups if regex.search(group)
-            ]
-        ) :
+        matches = [cls(spot, groups[group]) for group in groups if regex.search(group)]
+        if matches:
             return matches
 
         return []
