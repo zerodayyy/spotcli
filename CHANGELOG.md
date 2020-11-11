@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.2] - 2020-11-11
+
+### Fixed
+
+- Fixed compatibility issues on Python 3.6
+
 ## [1.1.1] - 2020-11-10
 
 ### Fixed
@@ -58,7 +64,8 @@ All notable changes to this project will be documented in this file.
 
 - Initial version
 
-[unreleased]: https://github.com/SupersonicAds/spotcli/compare/v1.1.1...HEAD
+[unreleased]: https://github.com/SupersonicAds/spotcli/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/SupersonicAds/spotcli/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/SupersonicAds/spotcli/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/SupersonicAds/spotcli/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/SupersonicAds/spotcli/compare/v1.0.3...v1.0.4
