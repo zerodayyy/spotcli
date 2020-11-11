@@ -36,7 +36,7 @@ fi
 
 echo -en "Installing SpotCLI..."
 PIP_STDOUT=$(mktemp 2>/dev/null)
-$PIP install -qq "$WHEEL_FILE"
+$PIP install --upgrade -qq "$WHEEL_FILE"
 rm -f $WHEEL_FILE >/dev/null 2>&1 || true
 rm -f $PIP_STDOUT >/dev/null 2>&1 || true
 mkdir -p $HOME/.spot >/dev/null
