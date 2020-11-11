@@ -6,7 +6,7 @@ DOWNLOAD_URL=$(curl -fsSL https://api.github.com/repos/SupersonicAds/spotcli/rel
         | grep browser_download_url \
         | cut -d '"' -f 4)
 WHEEL_FILE="$(mktemp -d)/${DOWNLOAD_URL##*/}"
-trap "rm -f $WHEEL_FILE >/dev/null 2>&1 || true && echo 'ERROR: SpotCLI wasn\\'t installed' && exit 1" ERR
+trap "rm -f $WHEEL_FILE >/dev/null 2>&1 || true && echo \"ERROR: SpotCLI wasn't installed\" && exit 1" ERR
 
 echo -en "Downloading latest wheel from GitHub..."
 curl -fsSL -o $WHEEL_FILE "$DOWNLOAD_URL"
