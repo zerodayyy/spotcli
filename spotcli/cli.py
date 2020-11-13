@@ -12,7 +12,7 @@ import semver
 
 import spotcli
 import spotcli.configuration
-import spotcli.tasks
+from spotcli.configuration.tasks import TargetList, Task
 
 UPDATE_URL = "https://api.github.com/repos/SupersonicAds/spotcli/releases/latest"
 UPDATE_COMMAND = 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/SupersonicAds/spotcli/main/install.sh)"'
@@ -35,7 +35,8 @@ def version():
 
 @click.command()
 @click.argument("kind")
-def list(kind):
+@click.option("-f", "--filter", multiple=True, default=[], help="Filter expression")
+def list(kind, filter):
     """List entities.
 
     KIND is either `aliases` or `scenarios`.
@@ -59,13 +60,23 @@ def list(kind):
     if kind == "aliases":
         table.add_column("Name", style="cyan")
         table.add_column("Targets", style="green")
-        for _, alias in config.aliases.items():
-            table.add_row(alias.name, "\n".join(alias.targets))
+        aliases = (
+            spotcli.utils.filter(config.aliases.keys(), filter)
+            if filter
+            else config.aliases.keys()
+        )
+        for alias in aliases:
+            table.add_row(alias, "\n".join(config.aliases[alias].targets))
     else:
         table.add_column("Name", style="magenta")
         table.add_column("Description")
-        for _, scenario in config.scenarios.items():
-            table.add_row(scenario.name, scenario.description)
+        scenarios = (
+            spotcli.utils.filter(config.scenarios.keys(), filter)
+            if filter
+            else config.scenarios.keys()
+        )
+        for scenario in scenarios:
+            table.add_row(scenario, config.scenarios[scenario].description)
     console.print(table)
     console.print("\n")
 
@@ -147,9 +158,8 @@ def status(group, show_processes):
             f"You can update SpotCLI by running:\n[bold]{UPDATE_COMMAND}[/]\n"
         )
     config = spotcli.configuration.load()
-    targets = spotcli.tasks.TargetList(
-        config.providers["spot"], config.aliases, [group]
-    )
+    targets = TargetList(config.providers["spot"], config.aliases, group)
+    print("TARGETS", targets)
     console.print("\n")
     table = rich.table.Table(title="Elastigroup status", show_lines=True)
     table.add_column("ID", justify="center", style="cyan")
@@ -290,10 +300,8 @@ def action(action: str, target: str, auto_approve: bool, **kwargs) -> None:
             f"You can update SpotCLI by running:\n[bold]{UPDATE_COMMAND}[/]\n"
         )
     config = spotcli.configuration.load()
-    targets = spotcli.tasks.TargetList(
-        config.providers["spot"], config.aliases, [target]
-    )
-    task = spotcli.tasks.Task(kind=action, targets=targets, **kwargs)
+    targets = TargetList(config.providers["spot"], config.aliases, [target])
+    task = Task(kind=action, targets=targets, **kwargs)
     console.print("\n")
     table = rich.table.Table(
         title=f"Going to [bold]{task.kind}[/] these elastigroups:", show_lines=True

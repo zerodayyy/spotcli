@@ -4,9 +4,8 @@ import sys
 import attr
 import rich.console
 from config import ConfigurationSet, config_from_yaml
-
+from spotcli.configuration.tasks import Alias, Scenario, TargetList, Task
 from spotcli.providers import Provider
-from spotcli.tasks import Alias, Scenario, TargetList, Task
 
 console = rich.console.Console(highlight=False)
 
