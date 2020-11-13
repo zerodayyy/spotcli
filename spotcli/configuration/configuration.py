@@ -147,8 +147,6 @@ class Config:
 
 
 def load():
-    console.print("Loading configuration")
-
     # Load bootstrap configuration
     try:
         bootstrap_provider = Provider(

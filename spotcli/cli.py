@@ -55,7 +55,6 @@ def list(kind, filter):
             f"You can update SpotCLI by running:\n[bold]{UPDATE_COMMAND}[/]\n"
         )
     config = spotcli.configuration.load()
-    console.print("\n")
     table = rich.table.Table(title=kind.title(), show_lines=True)
     if kind == "aliases":
         table.add_column("Name", style="cyan")
@@ -67,6 +66,8 @@ def list(kind, filter):
         )
         for alias in aliases:
             table.add_row(alias, "\n".join(config.aliases[alias].targets))
+        if not aliases:
+            table = "No aliases found!"
     else:
         table.add_column("Name", style="magenta")
         table.add_column("Description")
@@ -77,8 +78,9 @@ def list(kind, filter):
         )
         for scenario in scenarios:
             table.add_row(scenario, config.scenarios[scenario].description)
+        if not scenarios:
+            table = "No scenarios found!"
     console.print(table)
-    console.print("\n")
 
 
 @click.command()
@@ -114,7 +116,6 @@ def run(scenario, auto_approve):
     except KeyError:
         console.print(f"Scenario [bold red]{scenario}[/] not found")
         sys.exit(1)
-    console.print("\n")
     for task in s.tasks:
         table = rich.table.Table(
             title=f"Going to [bold]{task.kind}[/] these elastigroups:", show_lines=True
@@ -159,8 +160,6 @@ def status(group, show_processes):
         )
     config = spotcli.configuration.load()
     targets = TargetList(config.providers["spot"], config.aliases, group)
-    print("TARGETS", targets)
-    console.print("\n")
     table = rich.table.Table(title="Elastigroup status", show_lines=True)
     table.add_column("ID", justify="center", style="cyan")
     table.add_column("Name", style="magenta")
@@ -184,7 +183,6 @@ def status(group, show_processes):
         else:
             table.add_row(target.id, target.name, str(target.capacity["target"]))
     console.print(table)
-    console.print("\n")
 
 
 @click.command()
@@ -302,7 +300,6 @@ def action(action: str, target: str, auto_approve: bool, **kwargs) -> None:
     config = spotcli.configuration.load()
     targets = TargetList(config.providers["spot"], config.aliases, [target])
     task = Task(kind=action, targets=targets, **kwargs)
-    console.print("\n")
     table = rich.table.Table(
         title=f"Going to [bold]{task.kind}[/] these elastigroups:", show_lines=True
     )
