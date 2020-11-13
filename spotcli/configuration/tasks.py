@@ -7,8 +7,8 @@ from typing import List, Optional, Union
 
 import attr
 import rich.console
-
-from spotcli.elastigroup import Elastigroup, ElastigroupProcess
+from spotcli.providers.spot import SpotProvider
+from spotcli.utils.elastigroup import Elastigroup, ElastigroupProcess
 
 console = rich.console.Console(highlight=False)
 
@@ -24,30 +24,38 @@ class Alias(UserList):
 
 
 class TargetList(UserList):
-    def __init__(self, spot, aliases, targets):
+    def __init__(
+        self, spot: SpotProvider, aliases: List[Alias], targets: Union[str, List[str]]
+    ):
         self.spot = spot
         self.aliases = aliases
         self.targets = targets
 
     @property
-    def data(self):
-        def reduce(array, result=[]):
-            for item in array:
-                if isinstance(item, str):
-                    if item in self.aliases:
-                        reduce(self.aliases[item], result)
-                    else:
-                        result.append(item)
-                elif isinstance(item, Iterable):
-                    reduce(item, result)
-            return result
+    def data(self) -> List[Elastigroup]:
+        try:
+            targets = self._targets
+        except AttributeError:
 
-        if isinstance(self.targets, Iterable) and not isinstance(self.targets, str):
-            targets = []
-            for target in reduce(self.targets):
-                targets.extend(Elastigroup.find(self.spot.client(), target))
-            return targets
-        return Elastigroup.find(self.spot.client(), self.targets)
+            def reduce(
+                array: Union[List[str], str], result: Optional[List[str]] = []
+            ) -> List[str]:
+                """Flatten a list with arbitrary dimensions."""
+                if isinstance(array, str):
+                    array = [array]
+                for item in array:
+                    if isinstance(item, str):
+                        if item in self.aliases:
+                            reduce(self.aliases[item], result)
+                        else:
+                            result.append(item)
+                    elif isinstance(item, Iterable):
+                        reduce(item, result)
+                return result
+
+            targets = Elastigroup.find(self.spot.client(), reduce(self.targets))
+            self._targets = targets
+        return targets
 
 
 @attr.s(auto_attribs=True)
@@ -65,7 +73,7 @@ class Task(ABC):
 
         return decorator
 
-    def __new__(cls, kind, *args, **kwargs):
+    def __new__(cls, kind: str, *args, **kwargs) -> "Task":
         if cls is not Task:
             return super(Task, cls).__new__(cls, kind, *args, **kwargs)
         try:

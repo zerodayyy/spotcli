@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
 """Elastigroup module.
 
 This module accomodates an interface for Spot Elastigroup.
-
 """
+
 import enum
-import re
+from typing import List, Union
 
 import attr
 import durations
+import spotcli.utils
 import spotinst_sdk
 
 
@@ -31,18 +31,19 @@ class Elastigroup:
     id: str
 
     @classmethod
-    def find(cls, spot, query):
+    def find(
+        cls, spot: spotinst_sdk.SpotinstClient, query: Union[str, List[str]]
+    ) -> List["Elastigroup"]:
         """Find Elastigroups.
 
         Finds Elastigroups by name via a regular expression or a name value.
 
         Args:
             spot (spotinst_sdk.SpotinstClient): Spot client.
-            query (str): Elastigroup name or regular expression.
+            query (Union[str, List[str]]): Elastigroup names or regular expressions.
 
         Returns:
-            list of Elastigroup: Found Elastigroups.
-
+            List[Elastigroup]: Found Elastigroups.
         """
 
         try:
@@ -51,22 +52,12 @@ class Elastigroup:
             groups = {group["name"]: group["id"] for group in spot.get_elastigroups()}
             cls._elastigroups = groups
 
-        # Full match
-        if query in groups.keys():
-            return [cls(spot, groups[query])]
+        if isinstance(query, str):
+            query = [query]
 
-        # Substring match
-        matches = [cls(spot, groups[group]) for group in groups if query in group]
-        if matches:
-            return matches
-
-        # Regular expression match
-        regex = re.compile(query, re.IGNORECASE | re.ASCII)
-        matches = [cls(spot, groups[group]) for group in groups if regex.search(group)]
-        if matches:
-            return matches
-
-        return []
+        matches_keys = spotcli.utils.filter(groups.keys(), query)
+        matches = [cls(spot, groups[key]) for key in matches_keys]
+        return matches
 
     @property
     def _group(self):

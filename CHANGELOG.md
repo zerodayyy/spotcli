@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Added S3 provider
+- Added filtering feature to `list` command
+
+### Changed
+
+- Refactored module structure
+- Moved filtering to a separate module
+
 ## [1.1.2] - 2020-11-11
 
 ### Fixed
