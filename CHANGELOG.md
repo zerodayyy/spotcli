@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.0] - 2020-11-13
+
 ### Added
 
 - Added S3 provider
@@ -74,7 +76,8 @@ All notable changes to this project will be documented in this file.
 
 - Initial version
 
-[unreleased]: https://github.com/SupersonicAds/spotcli/compare/v1.1.2...HEAD
+[unreleased]: https://github.com/SupersonicAds/spotcli/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/SupersonicAds/spotcli/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/SupersonicAds/spotcli/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/SupersonicAds/spotcli/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/SupersonicAds/spotcli/compare/v1.0.4...v1.1.0
