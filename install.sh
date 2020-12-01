@@ -8,8 +8,9 @@ trap "" SIGINT
 DOWNLOAD_URL=$(curl -fsSL https://api.github.com/repos/SupersonicAds/spotcli/releases/latest \
         | grep browser_download_url \
         | cut -d '"' -f 4)
-WHEEL_FILE="$(mktemp -d)/${DOWNLOAD_URL##*/}"
-trap "rm -f $WHEEL_FILE >/dev/null 2>&1 || true && echo \"ERROR: SpotCLI wasn't installed\" && exit 1" ERR
+WHEEL_DIR=$(mktemp -d 2>/dev/null)
+WHEEL_FILE="$WHEEL_DIR/${DOWNLOAD_URL##*/}"
+trap "rm -rf $WHEEL_DIR >/dev/null 2>&1 || true && echo \"ERROR: SpotCLI wasn't installed\" && exit 1" ERR
 
 echo -en "Downloading latest wheel from GitHub..."
 curl -fsSL -o $WHEEL_FILE "$DOWNLOAD_URL"
@@ -38,10 +39,8 @@ else
 fi
 
 echo -en "Installing SpotCLI..."
-PIP_STDOUT=$(mktemp 2>/dev/null)
 $PIP install --upgrade -qq "$WHEEL_FILE"
-rm -f $WHEEL_FILE >/dev/null 2>&1 || true
-rm -f $PIP_STDOUT >/dev/null 2>&1 || true
+rm -rf $WHEEL_DIR >/dev/null 2>&1 || true
 mkdir -p $HOME/.spot >/dev/null
 touch $HOME/.spot/config.yaml >/dev/null
 echo -en "done\n"
