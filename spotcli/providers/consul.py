@@ -3,10 +3,10 @@ import sys
 from typing import Optional
 
 import attr
+import consul as consul_client  # type: ignore
 import rich.console
-from spotcli.providers import Provider
 
-import consul
+from spotcli.providers import Provider
 
 console = rich.console.Console(highlight=False)
 
@@ -24,7 +24,7 @@ class ConsulProvider(Provider):
 
     def client(self):
         try:
-            return self._consul
+            consul = getattr(self, "_consul")
         except AttributeError:
             # Initialize Consul client
             host, *port = self.server.split(":")
@@ -32,11 +32,12 @@ class ConsulProvider(Provider):
             scheme = self.scheme or "http"
             datacenter = self.datacenter or None
             token = self.token or None
-            consul_client = consul.Consul(
+            consul = consul_client.Consul(
                 host=host, port=port, scheme=scheme, dc=datacenter, token=token
             )
-            self._consul = consul_client
-            return consul_client
+            setattr(self, "_consul", consul)
+        finally:
+            return consul
 
     def get(self, path):
         kv_path = os.path.join(self.path, path)

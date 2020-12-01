@@ -4,12 +4,13 @@ This module accomodates an interface for Spot Elastigroup.
 """
 
 import enum
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 import attr
-import durations
+import durations  # type: ignore
+import spotinst_sdk  # type: ignore
+
 import spotcli.utils
-import spotinst_sdk
 
 
 @attr.s(auto_attribs=True)
@@ -47,10 +48,10 @@ class Elastigroup:
         """
 
         try:
-            groups = cls._elastigroups
+            groups = getattr(cls, "_elastigroups")
         except AttributeError:
             groups = {group["name"]: group["id"] for group in spot.get_elastigroups()}
-            cls._elastigroups = groups
+            setattr(cls, "_elastigroups", groups)
 
         if isinstance(query, str):
             query = [query]
@@ -60,15 +61,16 @@ class Elastigroup:
         return matches
 
     @property
-    def _group(self):
+    def _group(self) -> Dict[str, Any]:
         try:
-            return self._group_data
+            group_data = getattr(self, "_group_data")
         except AttributeError:
-            self._group_data = self.spot.get_elastigroup(self.id)
-            return self._group_data
+            group_data = self.spot.get_elastigroup(self.id)
+            setattr(self, "_group_data", group_data)
+        return group_data
 
     @property
-    def processes(self):
+    def processes(self) -> Dict[str, str]:
         """Get status of Elastigroup processes.
 
         This function iterates over all known processes, including custom aliases for
@@ -76,8 +78,8 @@ class Elastigroup:
         Elastigroup for suspended processes and scaling policies and returns corresponding
         statuses.
 
-        Value:
-            dict of str: str: Elastigroup processes and their statuses.
+        Returns:
+            Dict[str, str]: Elastigroup processes and their statuses.
 
         """
         process_suspensions = self.spot.list_suspended_process(self.id)
@@ -124,7 +126,7 @@ class Elastigroup:
         return processes
 
     @property
-    def capacity(self):
+    def capacity(self) -> Dict[str, int]:
         """Get Elastigroup capacity.
 
         Value:
@@ -135,7 +137,8 @@ class Elastigroup:
             **{k: self._group["capacity"][k] for k in ["minimum", "maximum", "target"]}
         )
 
-    def set_capacity(self, capacity):
+    @capacity.setter
+    def capacity(self, capacity: int) -> None:
         """Set Elastigroup capacity.
 
         You can provide an arbitrary combination of parameters (out of `minimum`, `maximum`,
@@ -150,7 +153,7 @@ class Elastigroup:
         self.spot.update_elastigroup({"capacity": capacity}, self.id)
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Get Elastigroup name.
 
         Value:
@@ -161,7 +164,7 @@ class Elastigroup:
         return name
 
     @property
-    def status(self):
+    def status(self) -> Dict[str, Any]:
         """Get Elastigroup status.
 
         This function aggregates Elastigroup ID, name, capacity and processes into a single dictionary.
@@ -178,7 +181,7 @@ class Elastigroup:
         }
         return status
 
-    def roll(self, batch=None, grace=None):
+    def roll(self, batch: str = "20%", grace: str = "5m") -> None:
         """Roll the Elastigroup.
 
         Rolls an Elastigroup. Batch can be specified as a percentage of `target` capacity (with %) or
@@ -190,24 +193,20 @@ class Elastigroup:
             grace (str, optional): Grace period. Default is 5 minutes.
 
         """
-        if not batch:
-            batch = "20%"
-        if not grace:
-            grace = "5m"
-        batch = (
-            int(batch.strip("%"))
-            if "%" in str(batch)
-            else int(int(batch) / self.capacity["target"] * 100)
+        batch_percentage = int(
+            batch.strip("%")
+            if "%" in batch
+            else int(batch) / self.capacity["target"] * 100
         )
-        grace = int(durations.Duration(grace).to_seconds())
+        grace_seconds = int(durations.Duration(grace).to_seconds())
         return self.spot.roll_group(
             self.id,
             spotinst_sdk.aws_elastigroup.Roll(
-                batch_size_percentage=batch, grace_period=grace
+                batch_size_percentage=batch_percentage, grace_period=grace_seconds
             ),
         )
 
-    def suspend(self, process):
+    def suspend(self, process: Union[str, "ElastigroupProcess"]) -> None:
         """Suspend a process.
 
         Suspends a process or an auto-scaling policy.
@@ -216,13 +215,13 @@ class Elastigroup:
             process (ElastigroupProcess): Process to suspend.
 
         """
-        if ElastigroupProcess(process) in [
+        if not isinstance(process, ElastigroupProcess):
+            process = ElastigroupProcess[process]
+        if process in [
             ElastigroupProcess.AUTO_SCALE_DOWN,
             ElastigroupProcess.AUTO_SCALE_UP,
         ]:
-            scaling_policy_kind = (
-                ElastigroupProcess(process).value.rsplit("_", 1)[-1].lower()
-            )
+            scaling_policy_kind = process.name.rsplit("_", 1)[-1].lower()
             scaling_policies = [
                 policy["policy_name"]
                 for policy in self._group["scaling"].get(scaling_policy_kind, [])
@@ -236,7 +235,7 @@ class Elastigroup:
             return
         self.spot.suspend_process(self.id, [process.name], None)
 
-    def unsuspend(self, process):
+    def unsuspend(self, process: Union[str, "ElastigroupProcess"]) -> None:
         """Unsuspend a process.
 
         Unsuspends a process or an auto-scaling policy.
@@ -245,13 +244,13 @@ class Elastigroup:
             process (ElastigroupProcess): Process to unsuspend.
 
         """
-        if ElastigroupProcess(process) in [
+        if not isinstance(process, ElastigroupProcess):
+            process = ElastigroupProcess[process]
+        if process in [
             ElastigroupProcess.AUTO_SCALE_DOWN,
             ElastigroupProcess.AUTO_SCALE_UP,
         ]:
-            scaling_policy_kind = (
-                ElastigroupProcess(process).value.rsplit("_", 1)[-1].lower()
-            )
+            scaling_policy_kind = process.name.rsplit("_", 1)[-1].lower()
             scaling_policies = [
                 policy["policy_name"]
                 for policy in self._group["scaling"].get(scaling_policy_kind, [])
@@ -261,7 +260,7 @@ class Elastigroup:
             return
         self.spot.remove_suspended_process(self.id, [process.name])
 
-    def scale_up(self, amount):
+    def scale_up(self, amount: Union[str, int]) -> None:
         """Add instances to Elastigroup.
 
         Scales the Elastigroup up by `amount` instances.
@@ -271,7 +270,7 @@ class Elastigroup:
 
         """
         amount = (
-            int(int(amount.strip("%")) / 100 * self.capacity["target"])
+            int(int(str(amount).strip("%")) / 100 * self.capacity["target"])
             if "%" in str(amount)
             else int(amount)
         )
@@ -279,7 +278,7 @@ class Elastigroup:
             return
         self.spot.scale_elastigroup_up(self.id, amount)
 
-    def scale_down(self, amount):
+    def scale_down(self, amount: Union[str, int]) -> None:
         """Remove instances from Elastigroup.
 
         Scales the Elastigroup down by `amount` instances.
@@ -289,7 +288,7 @@ class Elastigroup:
 
         """
         amount = (
-            int(int(amount.strip("%")) / 100 * self.capacity["target"])
+            int(int(str(amount).strip("%")) / 100 * self.capacity["target"])
             if "%" in str(amount)
             else int(amount)
         )

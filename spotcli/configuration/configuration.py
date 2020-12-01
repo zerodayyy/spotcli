@@ -4,6 +4,7 @@ import sys
 import attr
 import rich.console
 from config import ConfigurationSet, config_from_yaml
+
 from spotcli.configuration.tasks import Alias, Scenario, TargetList, Task
 from spotcli.providers import Provider
 
@@ -38,7 +39,7 @@ class Config:
     @property
     def sources(self):
         try:
-            return self._sources
+            sources = getattr(self, "_sources")
         except AttributeError:
             sources = []
             try:
@@ -49,18 +50,19 @@ class Config:
                             path=source["path"],
                         )
                     )
-                self._sources = sources
-                return sources
+                setattr(self, "_sources", sources)
             except KeyError:
                 console.print(
                     "[bold red]ERROR:[/] Missing [italic]sources[/] in the config"
                 )
                 sys.exit(1)
+        finally:
+            return sources
 
     @property
     def providers(self):
         try:
-            return self._providers
+            providers = getattr(self, "_providers")
         except AttributeError:
             providers = {}
             try:
@@ -79,15 +81,16 @@ class Config:
                 sys.exit(1)
             for name, provider in providers_raw.items():
                 providers[name] = Provider(name=name, **provider)
-            self._providers = providers
+            setattr(self, "_providers", providers)
+        finally:
             return providers
 
     @property
     def scenarios(self):
         try:
-            return self._scenarios
+            scenarios = getattr(self, "_scenarios")
         except AttributeError:
-            s = {}
+            scenarios = {}
             if "scenarios" in self.config:
                 try:
                     scenarios_raw = (
@@ -110,7 +113,7 @@ class Config:
                             self.providers["spot"], self.aliases, task["targets"]
                         )
                         tasks.append(Task(**task))
-                    s.update(
+                    scenarios.update(
                         {
                             name: Scenario(
                                 name=name,
@@ -119,14 +122,14 @@ class Config:
                             )
                         }
                     )
-            scenarios = s
-            self._scenarios = scenarios
+            setattr(self, "_scenarios", scenarios)
+        finally:
             return scenarios
 
     @property
     def aliases(self):
         try:
-            return self._aliases
+            aliases = getattr(self, "_aliases")
         except AttributeError:
             try:
                 aliases = (
@@ -142,7 +145,8 @@ class Config:
                     "[bold red]ERROR:[/] Missing [italic]aliases[/] in the config"
                 )
                 sys.exit(1)
-            self._aliases = aliases
+            setattr(self, "_aliases", aliases)
+        finally:
             return aliases
 
 

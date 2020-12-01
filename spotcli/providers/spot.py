@@ -1,5 +1,6 @@
 import attr
-import spotinst_sdk
+import spotinst_sdk  # type: ignore
+
 from spotcli.providers import Provider
 
 
@@ -13,12 +14,13 @@ class SpotProvider(Provider):
 
     def client(self) -> spotinst_sdk.SpotinstClient:
         try:
-            return self._spot
+            spot = getattr(self, "_spot")
         except AttributeError:
             spot = spotinst_sdk.SpotinstClient(
                 account_id=self.account, auth_token=self.token
             )
-            self._spot = spot
+            setattr(self, "_spot", spot)
+        finally:
             return spot
 
     def get(self):

@@ -12,21 +12,21 @@ class Provider(ABC):
     name: str
     kind: str = ""
 
-    providers = {}
-
     @classmethod
     def register(cls, kind):
         def decorator(subcls):
-            cls.providers[kind] = subcls
+            providers = getattr(cls, "providers", {})
+            providers.update({kind: subcls})
+            setattr(cls, "providers", providers)
             return subcls
 
         return decorator
 
-    def __new__(cls, name, kind, *args, **kwargs):
+    def __new__(cls, name: str, kind: str, *args, **kwargs) -> "Provider":
         if cls is not Provider:
-            return super(Provider, cls).__new__(cls, name, kind, *args, **kwargs)
+            return super(Provider, cls).__new__(cls, name, kind, *args, **kwargs)  # type: ignore
         try:
-            provider = cls.providers[kind]
+            provider = getattr(cls, "providers", {})[kind]
             return super(Provider, cls).__new__(provider)
         except KeyError:
             console.print(f"[bold red]ERROR:[/] Invalid provider kind: {kind}")

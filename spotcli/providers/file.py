@@ -3,6 +3,7 @@ import sys
 
 import attr
 import rich.console
+
 from spotcli.providers import Provider
 
 console = rich.console.Console(highlight=False)

@@ -2,11 +2,11 @@ import sys
 import threading
 from abc import ABC, abstractmethod
 from collections import UserList
-from collections.abc import Iterable
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import attr
 import rich.console
+
 from spotcli.providers.spot import SpotProvider
 from spotcli.utils.elastigroup import Elastigroup, ElastigroupProcess
 
@@ -14,7 +14,7 @@ console = rich.console.Console(highlight=False)
 
 
 class Alias(UserList):
-    def __init__(self, name, targets):
+    def __init__(self, name: str, targets: List[str]):
         self.name = name
         self.targets = targets
 
@@ -25,20 +25,23 @@ class Alias(UserList):
 
 class TargetList(UserList):
     def __init__(
-        self, spot: SpotProvider, aliases: List[Alias], targets: Union[str, List[str]]
+        self,
+        spot: SpotProvider,
+        aliases: Dict[str, Alias],
+        targets: Union[str, List[str]],
     ):
         self.spot = spot
         self.aliases = aliases
         self.targets = targets
 
     @property
-    def data(self) -> List[Elastigroup]:
+    def data(self):
         try:
-            targets = self._targets
+            targets = getattr(self, "_targets")
         except AttributeError:
 
             def reduce(
-                array: Union[List[str], str], result: Optional[List[str]] = []
+                array: Union[List[str], Alias, str], result: List[str] = []
             ) -> List[str]:
                 """Flatten a list with arbitrary dimensions."""
                 if isinstance(array, str):
@@ -49,13 +52,14 @@ class TargetList(UserList):
                             reduce(self.aliases[item], result)
                         else:
                             result.append(item)
-                    elif isinstance(item, Iterable):
+                    else:
                         reduce(item, result)
                 return result
 
             targets = Elastigroup.find(self.spot.client(), reduce(self.targets))
-            self._targets = targets
-        return targets
+            setattr(self, "_targets", targets)
+        finally:
+            return targets
 
 
 @attr.s(auto_attribs=True)
@@ -63,21 +67,21 @@ class Task(ABC):
     kind: str
     targets: TargetList
 
-    kinds = {}
-
     @classmethod
     def register(cls, kind):
         def decorator(subcls):
-            cls.kinds[kind] = subcls
+            kinds = getattr(cls, "kinds", {})
+            kinds.update({kind: subcls})
+            setattr(cls, "kinds", kinds)
             return subcls
 
         return decorator
 
     def __new__(cls, kind: str, *args, **kwargs) -> "Task":
         if cls is not Task:
-            return super(Task, cls).__new__(cls, kind, *args, **kwargs)
+            return super(Task, cls).__new__(cls, kind, *args, **kwargs)  # type: ignore
         try:
-            task = cls.kinds[kind]
+            task = getattr(cls, "kinds", {})[kind]
             return super(Task, cls).__new__(task)
         except KeyError:
             console.print(f"[bold red]ERROR:[/] Invalid action: {kind}")
@@ -201,7 +205,7 @@ class SuspendTask(Task):
 
     def run(self):
         def work(target, process, console):
-            process = ElastigroupProcess(process)
+            process = ElastigroupProcess[process]
             try:
                 target.suspend(process)
                 console.print(
@@ -237,7 +241,7 @@ class UnsuspendTask(Task):
 
     def run(self):
         def work(target, process, console):
-            process = ElastigroupProcess(process)
+            process = ElastigroupProcess[process]
             try:
                 target.unsuspend(process)
                 console.print(

@@ -3,9 +3,10 @@ import sys
 from typing import Optional
 
 import attr
-import boto3
+import boto3  # type: ignore
 import rich.console
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError  # type: ignore
+
 from spotcli.providers import Provider
 
 console = rich.console.Console(highlight=False)
@@ -23,7 +24,7 @@ class S3Provider(Provider):
 
     def client(self):
         try:
-            return self._s3
+            s3 = getattr(self, "_s3")
         except AttributeError:
             # Initialize S3 client
             credentials = (
@@ -35,7 +36,8 @@ class S3Provider(Provider):
                 else {}
             )
             s3 = boto3.resource("s3", **credentials)
-            self._s3 = s3
+            setattr(self, "_s3", s3)
+        finally:
             return s3
 
     def get(self, path):

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import sys
 import time
+from typing import List
 
 import click
 import requests
 import rich.console
 import rich.table
 import rich.traceback
-import semver
+import semver  # type: ignore
 
 import spotcli
 import spotcli.configuration
@@ -28,13 +29,13 @@ def main():
 
 
 @click.command()
-def version():
+def version() -> None:
     """Get SpotCLI version."""
     console.print(f"SpotCLI version {spotcli.__version__}")
 
 
 @click.command()
-@click.argument("kind")
+@click.argument("kind", type=click.Choice(("aliases", "scenarios")), required=True)
 @click.option(
     "-f",
     "--filter",
@@ -43,17 +44,11 @@ def version():
     multiple=True,
     help="Filter expression",
 )
-def list(kind, filter):
+def list(kind: str, filter: List[str]) -> None:
     """List entities.
 
     KIND is either `aliases` or `scenarios`.
     """
-    kind = kind.lower().strip()
-    if kind not in ["aliases", "scenarios"]:
-        console.print(
-            f"[bold red]ERROR:[/] Invalid argument [b]{kind}[/], should be [b]aliases[/] or [b]scenarios[/]"
-        )
-        return
     console.print(f"[bold]SpotCLI version {spotcli.__version__}")
     new_version = updates_available()
     if new_version:
@@ -74,7 +69,8 @@ def list(kind, filter):
         for alias in aliases:
             table.add_row(alias, "\n".join(config.aliases[alias].targets))
         if not aliases:
-            table = "No aliases found!"
+            console.print("No aliases found!")
+            return
     else:
         table.add_column("Name", style="magenta")
         table.add_column("Description")
@@ -86,12 +82,13 @@ def list(kind, filter):
         for scenario in scenarios:
             table.add_row(scenario, config.scenarios[scenario].description)
         if not scenarios:
-            table = "No scenarios found!"
+            console.print("No aliases found!")
+            return
     console.print(table)
 
 
 @click.command()
-@click.argument("scenario")
+@click.argument("scenario", type=click.STRING, required=True)
 @click.option(
     "-y",
     "--auto-approve",
@@ -100,7 +97,7 @@ def list(kind, filter):
     is_flag=True,
     help="Skip interactive approval before executing actions",
 )
-def run(scenario, auto_approve):
+def run(scenario: str, auto_approve: bool) -> None:
     """Run a scenario.
 
     SCENARIO is the name of the scenario to run.
@@ -146,7 +143,7 @@ def run(scenario, auto_approve):
 
 
 @click.command()
-@click.argument("group")
+@click.argument("group", type=click.STRING, required=True)
 @click.option(
     "-p",
     "--show-processes",
@@ -155,7 +152,7 @@ def run(scenario, auto_approve):
     is_flag=True,
     help="Show process suspension status",
 )
-def status(group, show_processes):
+def status(group: str, show_processes: bool) -> None:
     """Get elastigroup status.
 
     GROUP is elastigroup name, alias or regex.
@@ -195,20 +192,23 @@ def status(group, show_processes):
 
 
 @click.command()
-@click.argument("group")
+@click.argument("group", type=click.STRING, required=True)
 @click.option(
     "-b",
     "--batch",
     type=click.STRING,
     default="20%",
     help="Batch size, instances or percentage",
+    show_default=True,
 )
 @click.option(
     "-g",
     "--grace",
     type=click.STRING,
     default="5m",
+    callback=lambda _1, _2, g: g + "s" if g.isdigit() else g,
     help="Grace period, number with units (seconds if omitted)",
+    show_default=True,
 )
 @click.option(
     "-y",
@@ -218,7 +218,7 @@ def status(group, show_processes):
     is_flag=True,
     help="Skip interactive approval before executing actions",
 )
-def roll(group, batch, grace, auto_approve):
+def roll(group: str, batch: str, grace: str, auto_approve: bool) -> None:
     """Roll an elastigroup.
 
     GROUP is elastigroup name, alias or regex.
@@ -229,13 +229,14 @@ def roll(group, batch, grace, auto_approve):
 
 
 @click.command()
-@click.argument("group")
+@click.argument("group", type=click.STRING, required=True)
 @click.option(
     "-p",
     "--processes",
     type=click.Choice([p.name for p in ElastigroupProcess]),
     default=[],
     multiple=True,
+    required=True,
     help="Processes to suspend",
 )
 @click.option(
@@ -246,7 +247,7 @@ def roll(group, batch, grace, auto_approve):
     is_flag=True,
     help="Skip interactive approval before executing actions",
 )
-def suspend(group, processes, auto_approve):
+def suspend(group: str, processes: List[str], auto_approve: bool) -> None:
     """Suspend a process in an elastigroup.
 
     GROUP is elastigroup name, alias or regex.
@@ -257,13 +258,14 @@ def suspend(group, processes, auto_approve):
 
 
 @click.command()
-@click.argument("group")
+@click.argument("group", type=click.STRING, required=True)
 @click.option(
     "-p",
     "--processes",
     type=click.Choice([p.name for p in ElastigroupProcess]),
     default=[],
     multiple=True,
+    required=True,
     help="Processes to unsuspend",
 )
 @click.option(
@@ -274,7 +276,7 @@ def suspend(group, processes, auto_approve):
     is_flag=True,
     help="Skip interactive approval before executing actions",
 )
-def unsuspend(group, processes, auto_approve):
+def unsuspend(group: str, processes: List[str], auto_approve: bool) -> None:
     """Unsuspend a process in an elastigroup.
 
     GROUP is elastigroup name, alias or regex.
@@ -285,14 +287,15 @@ def unsuspend(group, processes, auto_approve):
 
 
 @click.command()
-@click.argument("kind")
-@click.argument("group")
+@click.argument("kind", type=click.Choice(("down", "up")), required=True)
+@click.argument("group", type=click.STRING, required=True)
 @click.option(
     "-a",
     "--amount",
     type=click.STRING,
     default="10%",
     help="How many instances to add or remove; amount or percentage",
+    show_default=True,
 )
 @click.option(
     "-y",
@@ -302,7 +305,7 @@ def unsuspend(group, processes, auto_approve):
     is_flag=True,
     help="Skip interactive approval before executing actions",
 )
-def scale(kind, group, amount, auto_approve):
+def scale(kind: str, group: str, amount: str, auto_approve: bool) -> None:
     """Scale an elastigroup up or down.
 
     KIND is the scaling direction: up or down.
@@ -333,7 +336,7 @@ def action(action: str, target: str, auto_approve: bool, **kwargs) -> None:
         )
     config = spotcli.configuration.load()
     targets = TargetList(config.providers["spot"], config.aliases, [target])
-    task = Task(kind=action, targets=targets, **kwargs)
+    task = Task(kind=action, targets=targets, **kwargs)  # type: ignore
     table = rich.table.Table(
         title=f"Going to [bold]{task.kind}[/] these elastigroups:", show_lines=True
     )

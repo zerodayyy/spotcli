@@ -15,7 +15,7 @@ def filter(items: List[str], query: Union[str, List[str]]) -> Set[str]:
         Set[str]: Filtered items.
     """
 
-    matches = set()
+    matches: Set[str] = set()
     if isinstance(query, str):
         query = [query]
     for query_item in query:
