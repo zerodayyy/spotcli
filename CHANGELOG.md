@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.2] - 2020-12-01
+
+### Fixed
+
+- Fixed grace period duration parsing in roll action
+
 ## [1.2.1] - 2020-11-13
 
 ### Fixed
@@ -82,7 +88,8 @@ All notable changes to this project will be documented in this file.
 
 - Initial version
 
-[unreleased]: https://github.com/SupersonicAds/spotcli/compare/v1.2.1...HEAD
+[unreleased]: https://github.com/SupersonicAds/spotcli/compare/v1.2.2...HEAD
+[1.2.1]: https://github.com/SupersonicAds/spotcli/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/SupersonicAds/spotcli/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/SupersonicAds/spotcli/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/SupersonicAds/spotcli/compare/v1.1.1...v1.1.2
