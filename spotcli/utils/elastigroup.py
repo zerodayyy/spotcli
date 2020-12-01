@@ -298,6 +298,7 @@ class Elastigroup:
         self.spot.scale_elastigroup_down(self.id, amount)
 
 
+@enum.unique
 class ElastigroupProcess(enum.Enum):
     """A set of Elastigroup processes.
 
@@ -305,11 +306,11 @@ class ElastigroupProcess(enum.Enum):
 
     """
 
-    AUTO_SCALE = "AUTO_SCALE"
-    AUTO_HEALING = "AUTO_HEALING"
-    OUT_OF_STRATEGY = "OUT_OF_STRATEGY"
-    PREVENTIVE_REPLACEMENT = "PREVENTIVE_REPLACEMENT"
-    REVERT_PREFERRED = "REVERT_PREFERRED"
-    SCHEDULING = "SCHEDULING"
-    AUTO_SCALE_DOWN = "AUTO_SCALE_DOWN"
-    AUTO_SCALE_UP = "AUTO_SCALE_UP"
+    AUTO_SCALE = enum.auto()
+    AUTO_HEALING = enum.auto()
+    OUT_OF_STRATEGY = enum.auto()
+    PREVENTIVE_REPLACEMENT = enum.auto()
+    REVERT_PREFERRED = enum.auto()
+    SCHEDULING = enum.auto()
+    AUTO_SCALE_DOWN = enum.auto()
+    AUTO_SCALE_UP = enum.auto()

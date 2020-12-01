@@ -5,7 +5,6 @@ import time
 import click
 import requests
 import rich.console
-import rich.prompt
 import rich.table
 import rich.traceback
 import semver
@@ -13,6 +12,7 @@ import semver
 import spotcli
 import spotcli.configuration
 from spotcli.configuration.tasks import TargetList, Task
+from spotcli.utils.elastigroup import ElastigroupProcess
 
 UPDATE_URL = "https://api.github.com/repos/SupersonicAds/spotcli/releases/latest"
 UPDATE_COMMAND = 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/SupersonicAds/spotcli/main/install.sh)"'
@@ -35,7 +35,14 @@ def version():
 
 @click.command()
 @click.argument("kind")
-@click.option("-f", "--filter", multiple=True, default=[], help="Filter expression")
+@click.option(
+    "-f",
+    "--filter",
+    type=click.STRING,
+    default=[],
+    multiple=True,
+    help="Filter expression",
+)
 def list(kind, filter):
     """List entities.
 
@@ -88,8 +95,9 @@ def list(kind, filter):
 @click.option(
     "-y",
     "--auto-approve",
-    is_flag=True,
+    type=click.BOOL,
     default=False,
+    is_flag=True,
     help="Skip interactive approval before executing actions",
 )
 def run(scenario, auto_approve):
@@ -127,7 +135,7 @@ def run(scenario, auto_approve):
             table.add_row(target.id, target.name, str(target.capacity["target"]))
         console.print(table)
         console.print("\n")
-    auto_approve or rich.prompt.Confirm.ask("Continue?") or sys.exit(1)
+    auto_approve or click.confirm("Continue?", abort=True)
     t_start = time.time()
     s.run()
     t_end = time.time()
@@ -142,8 +150,9 @@ def run(scenario, auto_approve):
 @click.option(
     "-p",
     "--show-processes",
-    is_flag=True,
+    type=click.BOOL,
     default=False,
+    is_flag=True,
     help="Show process suspension status",
 )
 def status(group, show_processes):
@@ -188,14 +197,25 @@ def status(group, show_processes):
 @click.command()
 @click.argument("group")
 @click.option(
-    "-b", "--batch", default="20%", help="Batch size, instances or percentage"
+    "-b",
+    "--batch",
+    type=click.STRING,
+    default="20%",
+    help="Batch size, instances or percentage",
 )
-@click.option("-g", "--grace", default="5m", help="Grace period")
+@click.option(
+    "-g",
+    "--grace",
+    type=click.STRING,
+    default="5m",
+    help="Grace period, number with units (seconds if omitted)",
+)
 @click.option(
     "-y",
     "--auto-approve",
-    is_flag=True,
+    type=click.BOOL,
     default=False,
+    is_flag=True,
     help="Skip interactive approval before executing actions",
 )
 def roll(group, batch, grace, auto_approve):
@@ -211,13 +231,19 @@ def roll(group, batch, grace, auto_approve):
 @click.command()
 @click.argument("group")
 @click.option(
-    "-p", "--processes", multiple=True, default=[], help="Processes to suspend"
+    "-p",
+    "--processes",
+    type=click.Choice([p.name for p in ElastigroupProcess]),
+    default=[],
+    multiple=True,
+    help="Processes to suspend",
 )
 @click.option(
     "-y",
     "--auto-approve",
-    is_flag=True,
+    type=click.BOOL,
     default=False,
+    is_flag=True,
     help="Skip interactive approval before executing actions",
 )
 def suspend(group, processes, auto_approve):
@@ -233,13 +259,19 @@ def suspend(group, processes, auto_approve):
 @click.command()
 @click.argument("group")
 @click.option(
-    "-p", "--processes", multiple=True, default=[], help="Processes to unsuspend"
+    "-p",
+    "--processes",
+    type=click.Choice([p.name for p in ElastigroupProcess]),
+    default=[],
+    multiple=True,
+    help="Processes to unsuspend",
 )
 @click.option(
     "-y",
     "--auto-approve",
-    is_flag=True,
+    type=click.BOOL,
     default=False,
+    is_flag=True,
     help="Skip interactive approval before executing actions",
 )
 def unsuspend(group, processes, auto_approve):
@@ -258,14 +290,16 @@ def unsuspend(group, processes, auto_approve):
 @click.option(
     "-a",
     "--amount",
+    type=click.STRING,
     default="10%",
     help="How many instances to add or remove; amount or percentage",
 )
 @click.option(
     "-y",
     "--auto-approve",
-    is_flag=True,
+    type=click.BOOL,
     default=False,
+    is_flag=True,
     help="Skip interactive approval before executing actions",
 )
 def scale(kind, group, amount, auto_approve):
@@ -306,11 +340,11 @@ def action(action: str, target: str, auto_approve: bool, **kwargs) -> None:
     table.add_column("ID", justify="center", style="cyan")
     table.add_column("Name", style="magenta")
     table.add_column("Instances", style="green")
-    for target in task.targets:
-        table.add_row(target.id, target.name, str(target.capacity["target"]))
+    for t in task.targets:
+        table.add_row(t.id, t.name, str(t.capacity["target"]))
     console.print(table)
     console.print("\n")
-    auto_approve or rich.prompt.Confirm.ask("Continue?") or sys.exit(1)
+    auto_approve or click.confirm("Continue?", abort=True)
     t_start = time.time()
     task.run()
     t_end = time.time()
@@ -322,15 +356,16 @@ def action(action: str, target: str, auto_approve: bool, **kwargs) -> None:
 
 def updates_available() -> str:
     url = UPDATE_URL
+    update = ""
     try:
         current_version = spotcli.__version__
         upstream_version = (
             requests.get(url, timeout=1).json().get("name", current_version).lstrip("v")
         )
         if semver.compare(upstream_version, current_version) == 1:
-            return upstream_version
-    except Exception:
-        return None
+            update = upstream_version
+    finally:
+        return update
 
 
 if __name__ == "__main__":
