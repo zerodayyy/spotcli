@@ -279,5 +279,4 @@ class Scenario:
     def run(self):
         results = []
         for task in self.tasks:
-            results.extend(task.run())
-        return results
+            task.run()
