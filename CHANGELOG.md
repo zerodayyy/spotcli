@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.3] - 2020-12-28
+
+### Fixed
+
+- Fixed cosmetic errors that appear after running a scenario
+
 ## [1.2.2] - 2020-12-01
 
 ### Fixed
