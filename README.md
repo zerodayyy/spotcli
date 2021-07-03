@@ -1,11 +1,11 @@
 # SpotCLI
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/SupersonicAds/spotcli/Release)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/SupersonicAds/spotcli)
-![GitHub Release Date](https://img.shields.io/github/release-date/SupersonicAds/spotcli)
-![GitHub issues](https://img.shields.io/github/issues/SupersonicAds/spotcli)
-![GitHub top language](https://img.shields.io/github/languages/top/SupersonicAds/spotcli)
-![GitHub](https://img.shields.io/github/license/SupersonicAds/spotcli)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/zerodayyy/spotcli/Release)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/zerodayyy/spotcli)
+![GitHub Release Date](https://img.shields.io/github/release-date/zerodayyy/spotcli)
+![GitHub issues](https://img.shields.io/github/issues/zerodayyy/spotcli)
+![GitHub top language](https://img.shields.io/github/languages/top/zerodayyy/spotcli)
+![GitHub](https://img.shields.io/github/license/zerodayyy/spotcli)
 
 SpotCLI is a command-line interface for managing Spot Elastigroups.
 
@@ -14,12 +14,12 @@ SpotCLI is a command-line interface for managing Spot Elastigroups.
 Install latest SpotCLI:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/SupersonicAds/spotcli/main/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/zerodayyy/spotcli/main/install.sh)"
 ```
 
 You can also install SpotCLI manually:
 
-- Download wheel from [releases](https://github.com/SupersonicAds/spotcli/releases) page
+- Download wheel from [releases](https://github.com/zerodayyy/spotcli/releases) page
 - Install SpotCLI using pip:
 
 ```bash
